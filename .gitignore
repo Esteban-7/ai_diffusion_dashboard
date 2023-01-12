@@ -1,0 +1,7 @@
+*.json
+test.py
+*.ipynb
+__pycache__/
+.ipynb_checkpoints/
+pages/__pycache__/
+test.py
