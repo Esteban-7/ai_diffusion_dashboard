@@ -110,7 +110,11 @@ def build_institutions_df():
     
     del ids, names, types, works,citations,countries,regions,cities,lats,longs
 
+    df_inst["AI_penetration"] = df_inst["ai_papers"]/df_inst["works_count"]
+    df_inst = df_inst.fillna(0)
+    
     df_inst.to_csv("data/df_inst.csv")
+
     pass
     
 

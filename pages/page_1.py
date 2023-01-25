@@ -35,8 +35,9 @@ layout = dbc.Container([
                 options=[
                     {"label": "Publications","value": "works_count"},
                     {"label": "Citations","value": "cited_by_count"},
-                    {"label": "AI Publications","value": "ai_papers"},
                     {"label": "Citations per paper","value": "citations_per_paper"},
+                    {"label": "AI Publications","value": "ai_papers"},
+                    {"label": "AI Penetration","value": "AI_penetration"},
                     {"label":"AI participation in total papers 2012","value":"ai_prcnt_2012"},
                     {"label":"AI participation in total papers 2020","value":"ai_prcnt_2020"},
                     {"label":"Growth in the participation of AI","value":"ai_growth"},
@@ -82,7 +83,7 @@ layout = dbc.Container([
 
     dbc.Row([
         dbc.Col([
-        html.Label('AI growth & relevance of institutions.'),
+        html.Label('AI Penetration & relevance of institutions.'),
         html.Br(),
         dcc.Graph(id = "scatter", figure = {})    
         
@@ -141,6 +142,8 @@ def update_graph(option_slctd,indicator_selected,institution):
         title = "Concentrations of AI publications"
     elif indicator_selected == "citations_per_paper":
         title = "Relevance of institution (citations per paper)"
+    elif indicator_selected == "AI_penetration":
+        title = "AI penetration per institution (AI papers as share of total publications)"
     elif indicator_selected == "ai_prcnt_2012":
         title = "Proportion of AI publications in the total of publications by the institution: 2012"
     elif indicator_selected == "ai_prcnt_2020":
@@ -155,12 +158,13 @@ def update_graph(option_slctd,indicator_selected,institution):
                     mapbox_style="stamen-terrain", title = title, height = 750,
                     labels= {"works_count":"Publications","cited_by_count":"Citations",
                             "ai_papers":"AI Publications","citations_per_paper":"Relevance",
-                            "ai_prcnt_2012":"Proportion of AI articles","ai_prcnt_2020":"Proportion of AI articles",
-                            "ai_growth":"Growth in AI participation",
+                            "ai_prcnt_2012":"AI articles (%)","ai_prcnt_2020":"AI articles (%)",
+                            "ai_growth":"Growth in AI",
+                            "AI_penetration":"AI articles (%)"
                             })
 
-    scatter = px.scatter(dff[dff["ai_growth"]!=0], x = "citations_per_paper",y = "ai_growth",  trendline="ols",trendline_color_override="red",
-                            labels={"citations_per_paper":"relevance","ai_growth":"AI adoptation"})       
+    scatter = px.scatter(dff[dff["AI_penetration"]!=0], x = "citations_per_paper",y = "AI_penetration",  trendline="ols",trendline_color_override="red",
+                            labels={"citations_per_paper":"relevance","AI_penetration":"AI penetration"})       
     return [fig, scatter]
 
 

@@ -2,7 +2,7 @@ import dash
 from dash import Dash,dcc, html, callback, Output, Input
 import plotly.express as px
 import dash_bootstrap_components as dbc
-
+import pandas as pd
 from networks import get_network
 import dash_cytoscape as cyto
 from get_data import get_institutions
@@ -19,6 +19,7 @@ df_inst = get_institutions()
 
 x = get_network("countries")
 countries_network  = x[0]
+
 nodes_names_countries = x[1]
 del x
 
@@ -67,7 +68,7 @@ layout = dbc.Container([
                         clearable=False,
                         options=[
                             {'label': name.capitalize(), 'value': name}
-                            for name in ['grid', 'random', 'circle', 'cose', 'concentric']
+                            for name in ['grid', 'random', 'circle', 'concentric']
                             ],
                         style={'width': "80%"}
                         ),
@@ -249,6 +250,15 @@ layout = dbc.Container([
     html.Br(),
 
     dbc.Row([
+        dbc.Col([
+        html.Label('AI Penetration & centrality.'),
+        html.Br(),
+        dcc.Graph(id = "scatter_network", figure = {})    
+        
+        ], width = 12)
+    ]),
+
+    dbc.Row([
         dcc.Markdown("""
             **Instructions:**
             
@@ -280,7 +290,8 @@ layout = dbc.Container([
     [Output(component_id='graph_countries',component_property="layout"),
     Output(component_id='graph_countries',component_property="elements"),
     Output(component_id='graph_types',component_property="layout"),
-    Output(component_id='graph_concepts',component_property="layout"),],
+    Output(component_id='graph_concepts',component_property="layout"),
+    Output(component_id='scatter_network',component_property="figure"),],
     [Input(component_id="update_layout_countries",component_property="value"),
     Input(component_id="country_network",component_property="value"),
     Input(component_id="community_country_network",component_property="value"),
@@ -289,9 +300,25 @@ layout = dbc.Container([
 )
 def update_layout(layout, country,community_country,layout_types,layout_concepts):
     
-    countries_network  = get_network(file = "countries",filter_1 =country,filter_2=community_country)[0]
+    x = get_network(file = "countries",filter_1 =country,filter_2=community_country)
+    countries_network  = x[0]
+    data = x[2]
+    del x
 
-    
+    country = []
+    centrality = []
+    AI_penetration = []
+    for elem in data:
+        country.append(elem["data"]["id"])
+        centrality.append(elem["data"]["centrality_eigen"])
+        AI_penetration.append(elem["data"]["ai_papers"]/elem["data"]["publications"])
+    dicti = {"country":country,"centrality":centrality,"AI_penetration":AI_penetration}
+    df = pd.DataFrame(dicti)
+
+    scatter = px.scatter(df[df["AI_penetration"]!=0], x = "centrality",y = "AI_penetration",  trendline="ols",trendline_color_override="red",
+                            labels={"centrality":"Centrality","AI_penetration":"AI penetration"})   
+
     return [{'name': layout,'animate': True}, countries_network,
             {'name': layout_types,'animate': True},
-            {'name': layout_concepts,'animate': True}]
+            {'name': layout_concepts,'animate': True},
+            scatter]

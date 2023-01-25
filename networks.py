@@ -28,15 +28,17 @@ def get_network(file, filter_1 = "All", filter_2 = "All"):
     g = nx.from_pandas_edgelist(edgelist,source = "source",target="target", edge_attr = "weight")
 
     df_inst = get_institutions()
-    df_inst = df_inst[[variable,"works_count","cited_by_count"]]
+    df_inst = df_inst[[variable,"works_count","cited_by_count","ai_papers"]]
     df_inst = df_inst[df_inst[variable] != 'unkown' ]
     df_inst = df_inst.groupby(variable).sum()
     di = df_inst.to_dict()
     publications = di["works_count"]
     citations = di['cited_by_count']
+    ai_papers = di['ai_papers']
 
     nx.set_node_attributes(g, publications,"publications")
     nx.set_node_attributes(g, citations,"citations")
+    nx.set_node_attributes(g, ai_papers,"ai_papers")
 
     centrality_eigen = nx.eigenvector_centrality_numpy(g, weight='weight')
     nx.set_node_attributes(g, centrality_eigen, 'centrality_eigen')
@@ -74,4 +76,14 @@ def get_network(file, filter_1 = "All", filter_2 = "All"):
     
     elements = data + edges_list
 
-    return [elements, nodes_names]
+    if file == "countries":
+        coordinates = pd.read_csv("data/coordinates.csv", sep = ";")
+        for point in data:
+            country_name = point["data"]["id"]
+            try:
+                point["position"] = {"x":float(coordinates[coordinates["country"]==country_name]["longitude"]),"y":float(coordinates[coordinates["country"]==country_name]["latitude"])}
+            except:
+                print(point)
+
+
+    return [elements, nodes_names, data]
