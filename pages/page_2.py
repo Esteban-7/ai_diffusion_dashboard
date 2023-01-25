@@ -255,7 +255,15 @@ layout = dbc.Container([
         html.Br(),
         dcc.Graph(id = "scatter_network", figure = {})    
         
-        ], width = 12)
+        ], width = 6),
+
+        
+        dbc.Col([
+        html.Label('Centrality.'),
+        html.Br(),
+        dcc.Graph(id = "centrality_bar", figure = {})    
+        
+        ], width = 6),
     ]),
 
     dbc.Row([
@@ -291,7 +299,8 @@ layout = dbc.Container([
     Output(component_id='graph_countries',component_property="elements"),
     Output(component_id='graph_types',component_property="layout"),
     Output(component_id='graph_concepts',component_property="layout"),
-    Output(component_id='scatter_network',component_property="figure"),],
+    Output(component_id='scatter_network',component_property="figure"),
+    Output(component_id='centrality_bar',component_property="figure"),],
     [Input(component_id="update_layout_countries",component_property="value"),
     Input(component_id="country_network",component_property="value"),
     Input(component_id="community_country_network",component_property="value"),
@@ -316,9 +325,21 @@ def update_layout(layout, country,community_country,layout_types,layout_concepts
     df = pd.DataFrame(dicti)
 
     scatter = px.scatter(df[df["AI_penetration"]!=0], x = "centrality",y = "AI_penetration",  trendline="ols",trendline_color_override="red",
-                            labels={"centrality":"Centrality","AI_penetration":"AI penetration"})   
+                            title= "Centrality in network and AI Intensity",
+                            labels={"centrality":"Centrality","AI_penetration":"AI penetration"})
+
+    centrality = px.histogram(df.sort_values("centrality",ascending = False).head(15), x = "country", y = "centrality", # category_orders=dict(type=[x for x in sorted(list(df.country.unique()))]),
+                                color_discrete_sequence=['darkblue'],
+                                title= "Centrality in network per country",
+                                labels = {"country":"Country","centrality":"Eigen Centrality" })   
 
     return [{'name': layout,'animate': True}, countries_network,
             {'name': layout_types,'animate': True},
             {'name': layout_concepts,'animate': True},
-            scatter]
+            scatter,centrality]
+
+
+
+
+
+
