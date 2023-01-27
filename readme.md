@@ -15,6 +15,6 @@
 
   The packages needed for development are found in requirements.txt
 
-  The deployed project is found in: 
+  The deployed project is found in:  http://pythonprojectel.pythonanywhere.com/
 
 
